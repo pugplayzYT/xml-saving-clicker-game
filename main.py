@@ -1,7 +1,11 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
+import sys
+from PyQt6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+)
 import xml.etree.ElementTree as ET
 import os
 
@@ -44,42 +48,47 @@ def load_score():
     return 0
 
 
-# Kivy UI
-class ClickerApp(App):
-    def build(self):
+# PyQt6 UI
+class ClickerWindow(QWidget):
+    def __init__(self):
+        super().__init__()
         self.score = load_score()
+        self.init_ui()
 
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
+    def init_ui(self):
+        self.setWindowTitle("Clicker Game")
+        layout = QVBoxLayout()
 
-        # Score Label
-        self.label = Label(text=f"Score: {self.score}", font_size=30, bold=True)
-        layout.add_widget(self.label)
+        self.label = QLabel(f"Score: {self.score}")
+        layout.addWidget(self.label)
 
-        # Click Button
-        btn_click = Button(text="Click!", font_size=24, size_hint=(None, None), size=(200, 60))
-        btn_click.bind(on_press=self.increment_score)
-        layout.add_widget(btn_click)
+        btn_click = QPushButton("Click!")
+        btn_click.clicked.connect(self.increment_score)
+        layout.addWidget(btn_click)
 
-        # Reset Button
-        btn_reset = Button(text="Reset", font_size=20, size_hint=(None, None), size=(150, 50))
-        btn_reset.bind(on_press=self.reset_score)
-        layout.add_widget(btn_reset)
+        btn_reset = QPushButton("Reset")
+        btn_reset.clicked.connect(self.reset_score)
+        layout.addWidget(btn_reset)
 
-        return layout
+        self.setLayout(layout)
 
-    # Increment score
-    def increment_score(self, instance):
+    def increment_score(self):
         self.score += 1
-        self.label.text = f"Score: {self.score}"
+        self.label.setText(f"Score: {self.score}")
         save_score(self.score)
 
-    # Reset score
-    def reset_score(self, instance):
+    def reset_score(self):
         self.score = 0
-        self.label.text = f"Score: {self.score}"
+        self.label.setText(f"Score: {self.score}")
         save_score(self.score)
 
 
-# Run the app
+def main():
+    app = QApplication(sys.argv)
+    window = ClickerWindow()
+    window.show()
+    sys.exit(app.exec())
+
+
 if __name__ == "__main__":
-    ClickerApp().run()
+    main()
